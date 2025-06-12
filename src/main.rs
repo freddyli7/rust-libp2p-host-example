@@ -195,6 +195,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 } else {
                                     println!("Started storing record.");
                                 }
+
+                                // query the record right after storing
+                                let key = Key::new(&"my-key");
+                                second_peer_swarm.behaviour_mut().kademlia.get_record(key, Quorum::One);
                             }
                         }
                     }
@@ -203,7 +207,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         })
     };
 
-
+    // === Run both peers in separate tasks ===
     futures::future::join(swarm1_fut, swarm2_fut).await;
 
     Ok(())
