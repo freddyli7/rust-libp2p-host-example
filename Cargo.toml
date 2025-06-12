@@ -1,0 +1,11 @@
+
+
+[package]
+name = "rust-libp2p-host-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+futures = "0.3.31"
+tokio = { version = "1", features = ["full"] }
+libp2p = { version = "0.44", features = ["mdns", "tcp-tokio", "dns-tokio", "websocket"] }
