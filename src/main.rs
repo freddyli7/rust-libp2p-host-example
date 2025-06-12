@@ -23,7 +23,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     impl MyBehaviour {
         async fn new(local_peer_id: PeerId) -> Result<Self, Box<dyn Error>> {
             Ok(Self {
-                ping: Ping::new(PingConfig::new()),
+                ping: Ping::new(PingConfig::new().with_keep_alive(true)),
                 mdns: Mdns::new(MdnsConfig::default()).await?,
                 kademlia: Kademlia::new(local_peer_id, MemoryStore::new(local_peer_id)),
             })
