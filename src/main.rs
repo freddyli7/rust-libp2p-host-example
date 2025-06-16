@@ -2,10 +2,7 @@ use std::error::Error;
 
 use futures::prelude::*;
 use libp2p::{development_transport, identity, mdns::{Mdns, MdnsEvent}, NetworkBehaviour, PeerId, ping::{Ping, PingConfig, PingEvent}, swarm::{SwarmBuilder, SwarmEvent}, Swarm};
-use libp2p::kad::{
-    GetRecordError,
-    GetRecordOk, Kademlia, KademliaEvent, PutRecordError, PutRecordOk, Quorum, Record, record::Key, record::store::MemoryStore,
-};
+use libp2p::kad::{GetRecordError, GetRecordOk, Kademlia, KademliaConfig, KademliaEvent, PutRecordError, PutRecordOk, Quorum, Record, record::Key, record::store::MemoryStore};
 use libp2p::mdns::MdnsConfig;
 use libp2p::multiaddr::Protocol;
 use tokio::sync::oneshot;
@@ -22,10 +19,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     impl MyBehaviour {
         async fn new(local_peer_id: PeerId) -> Result<Self, Box<dyn Error>> {
+            let mut config = KademliaConfig::default();
+            config.set_protocol_name(b"/record/kad/1.0.0".to_vec());
+            let store = MemoryStore::new(local_peer_id);
+            let kademlia = Kademlia::with_config(local_peer_id, store, config);
+
             Ok(Self {
                 ping: Ping::new(PingConfig::new().with_keep_alive(true)),
                 mdns: Mdns::new(MdnsConfig::default()).await?,
-                kademlia: Kademlia::new(local_peer_id, MemoryStore::new(local_peer_id)),
+                kademlia,
             })
         }
     }
