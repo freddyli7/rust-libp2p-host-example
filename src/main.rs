@@ -1,4 +1,6 @@
 use std::error::Error;
+use std::ops::Add;
+use std::time::{Duration, Instant};
 
 use futures::prelude::*;
 use libp2p::{development_transport, identity, mdns::{Mdns, MdnsEvent}, NetworkBehaviour, PeerId, ping::{Ping, PingConfig, PingEvent}, swarm::{SwarmBuilder, SwarmEvent}, Swarm};
@@ -187,10 +189,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 println!("Connection established with first peer");
 
                                 let record = Record {
-                                    key: Key::new(&"my-key"),
-                                    value: b"hello-libp2p".to_vec(),
+                                    key: Key::new(&"/record/my-key-1"),
+                                    value: b"hello-libp2p-1".to_vec(),
                                     publisher: Some(second_peer_id),
-                                    expires: None,
+                                    expires: Some(Instant::now() + Duration::from_secs(30)),
                                 };
                                 if let Err(e) = second_peer_swarm.behaviour_mut().kademlia.put_record(record, Quorum::One) {
                                     println!("Failed to start put_record: {:?}", e);
@@ -199,7 +201,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 }
 
                                 // query the record right after storing
-                                let key = Key::new(&"my-key");
+                                let key = Key::new(&"/record/my-key-1");
                                 second_peer_swarm.behaviour_mut().kademlia.get_record(key, Quorum::One);
                             }
                         }
@@ -209,7 +211,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         })
     };
 
-    // === Run both peers in separate tasks ===
     futures::future::join(swarm1_fut, swarm2_fut).await;
 
     Ok(())
