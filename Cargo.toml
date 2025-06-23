@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 futures = "0.3.31"
 tokio = { version = "1", features = ["full"] }
+ed25519-dalek = "1.0"
 libp2p = { version = "0.44", features = ["mdns", "tcp-tokio", "dns-tokio", "websocket"] }
