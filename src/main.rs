@@ -65,15 +65,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 KademliaEvent::OutboundQueryCompleted { result, .. } => match result {
                     libp2p::kad::QueryResult::GetRecord(Ok(GetRecordOk { records, .. })) => {
                         for record in records {
-                            // println!(
-                            //     "Got record for key {:?}: {:?}",
-                            //     record.record.key,
-                            //     String::from_utf8_lossy(&record.record.value)
-                            // );
                             println!(
-                                "Got record for key {:?}: {:?}",
+                                "Got record for key {:?}: value: {:?}, publisher: {:?}, expires: {:?}",
                                 record.record.key,
-                                 &record.record
+                                &record.record.value,
+                                record.record.publisher,
+                                record.record.expires,
                             );
                         }
                     }
@@ -208,11 +205,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     if *peer_id == alice_peer_id {
                         println!("Connection established with first peer");
 
+                        // put rust record
                         let record = Record {
                             key: rust_side_key.clone(),
                             value: b"hello-libp2p-rust".to_vec(),
                             publisher: Some(bob_peer_id),
-                            expires: Some(Instant::now() + Duration::from_secs(3000)),
+                            expires: Some(Instant::now() + Duration::from_secs(600)),
                         };
 
                         if let Err(e) = second_peer_swarm.behaviour_mut().kademlia.put_record(record, Quorum::One) {
@@ -235,7 +233,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
             }, if interval.is_some() => {
                         // put_value and put_value_at_peer key
-                        let query_key = Key::new(&"/record/12D3KooWP2F2DdjvoPbgC8VLU1PH9WB1NTnjAXFNiWhbpioWYSbR");
+
+                        // Alice
+                         let query_key = Key::new(&"/record/12D3KooWP2F2DdjvoPbgC8VLU1PH9WB1NTnjAXFNiWhbpioWYSbR");
+                        // Bob
+                        // let query_key = Key::new(&"/record/12D3KooWKWiJaRrKxxq6PwxdWFbg2uou5ejM6NGAgzotgsDWvvn6");
 
                         // local record key
                         // let query_key = Key::new(&"/record/my-key-go");
